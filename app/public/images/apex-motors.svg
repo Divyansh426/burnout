@@ -1,0 +1,8 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120">
+  <rect width="320" height="120" rx="8" fill="#12140e"></rect>
+  <path d="M28 76 58 28 88 76H70L58 56 46 76Z" fill="#d2ff00"></path>
+  <path d="M38 64H78" stroke="#d2ff00" stroke-width="5"></path>
+  <text x="102" y="57" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#f4f4ed">APEX</text>
+  <text x="103" y="79" font-family="Arial,sans-serif" font-size="12" letter-spacing="4" fill="#d2ff00">MOTORS</text>
+</svg>
