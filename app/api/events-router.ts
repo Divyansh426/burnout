@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { createRouter, publicQuery, adminQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import { hotEvents } from "@db/schema";
-import { storage } from "./lib/storage";
+import { deleteLocalImage } from "./lib/local-storage";
 import { storageUrl } from "./lib/storage-url";
 
 export const eventsRouter = createRouter({
@@ -69,9 +69,9 @@ export const eventsRouter = createRouter({
   remove: adminQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
     const db = getDb();
     const [row] = await db.select().from(hotEvents).where(eq(hotEvents.id, input.id));
-    if (row?.posterImageKey) {
-      try { await storage.deleteFile({ fileKey: row.posterImageKey }); } catch { /* ignore */ }
-    }
+   if (row?.posterImageKey) {
+  await deleteLocalImage(row.posterImageKey);
+}
     await db.delete(hotEvents).where(eq(hotEvents.id, input.id));
     return { ok: true };
   }),

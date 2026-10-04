@@ -22,11 +22,32 @@ const labelCls = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.18em]
 
 type Tab = "dashboard" | "events" | "registrations" | "points" | "payment";
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+function validateImage(file: File): string | null {
+  if (!file.type.startsWith("image/")) return "Please choose an image file.";
+  if (file.size > MAX_IMAGE_SIZE) return "Image must be 5 MB or smaller.";
+  return null;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return "Something went wrong. Please try again.";
+}
+
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = () => resolve((r.result as string).split(",")[1]);
-    r.onerror = reject;
+    r.onload = () => {
+      const result = typeof r.result === "string" ? r.result : "";
+      const base64 = result.split(",")[1];
+      if (!base64) {
+        reject(new Error("Could not read this image. Please choose it again."));
+        return;
+      }
+      resolve(base64);
+    };
+    r.onerror = () => reject(new Error("Could not read this image. Please try again."));
     r.readAsDataURL(file);
   });
 }
@@ -175,18 +196,39 @@ function EventsAdmin() {
   const [form, setForm] = useState({ name: "", description: "", instagramReel: "", eventDate: "", venue: "", showOnHomepage: true });
   const [poster, setPoster] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploadError("");
+    setSuccessMessage("");
+
+    if (poster) {
+      const validationError = validateImage(poster);
+      if (validationError) {
+        setUploadError(validationError);
+        return;
+      }
+    }
+
     setBusy(true);
     try {
       const { id } = await create.mutateAsync(form);
       if (poster) {
         const contentBase64 = await fileToBase64(poster);
-        await uploadPoster.mutateAsync({ eventId: id, fileName: `posters/${id}-${poster.name}`, contentBase64, contentType: poster.type });
+        await uploadPoster.mutateAsync({
+          eventId: id,
+          fileName: poster.name,
+          contentBase64,
+          contentType: poster.type,
+        });
       }
       setForm({ name: "", description: "", instagramReel: "", eventDate: "", venue: "", showOnHomepage: true });
       setPoster(null);
+      setSuccessMessage(poster ? "Event created and poster uploaded." : "Event created.");
+    } catch (error) {
+      setUploadError(getErrorMessage(error));
     } finally {
       setBusy(false);
     }
@@ -229,9 +271,31 @@ function EventsAdmin() {
             <label className={labelCls}>Poster image</label>
             <label className="flex h-20 cursor-pointer items-center justify-center gap-2 border border-dashed border-border text-xs uppercase tracking-wider text-[#6b705c] hover:border-[#d2ff00]/60 hover:text-[#d2ff00]">
               <Upload className="h-4 w-4" /> {poster ? poster.name : "Choose image"}
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => setPoster(e.target.files?.[0] ?? null)} />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setUploadError("");
+                  setSuccessMessage("");
+                  if (file) {
+                    const validationError = validateImage(file);
+                    if (validationError) {
+                      setPoster(null);
+                      setUploadError(validationError);
+                      e.target.value = "";
+                      return;
+                    }
+                  }
+                  setPoster(file);
+                }}
+              />
             </label>
+            <p className="mt-1 text-[11px] text-[#6b705c]">Image only · maximum 5 MB</p>
           </div>
+          {uploadError && <p role="alert" className="text-sm text-[#ff6b4a]">{uploadError}</p>}
+          {successMessage && <p role="status" className="text-sm text-[#d2ff00]">{successMessage}</p>}
           <label className="flex items-center gap-3 text-sm text-[#b4b8a5]">
             <input
               type="checkbox"
@@ -511,6 +575,8 @@ function PaymentAdmin() {
     registrationFee: string;
   } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
 
   const current = form ?? {
     upiId: pay?.upiId ?? "",
@@ -563,6 +629,8 @@ function PaymentAdmin() {
             No QR uploaded yet
           </div>
         )}
+        {uploadError && <p role="alert" className="mt-3 text-sm text-[#ff6b4a]">{uploadError}</p>}
+        {uploadSuccess && <p role="status" className="mt-3 text-sm text-[#d2ff00]">{uploadSuccess}</p>}
         <label className="mt-4 flex h-14 cursor-pointer items-center justify-center gap-2 border border-dashed border-border text-xs uppercase tracking-wider text-[#6b705c] hover:border-[#d2ff00]/60 hover:text-[#d2ff00]">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {busy ? "Uploading…" : "Upload new QR"}
@@ -573,12 +641,30 @@ function PaymentAdmin() {
             onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f) return;
+
+              setUploadError("");
+              setUploadSuccess("");
+              const validationError = validateImage(f);
+              if (validationError) {
+                setUploadError(validationError);
+                e.target.value = "";
+                return;
+              }
+
               setBusy(true);
               try {
                 const contentBase64 = await fileToBase64(f);
-                await uploadQr.mutateAsync({ fileName: `qr/${Date.now()}-${f.name}`, contentBase64, contentType: f.type });
+                await uploadQr.mutateAsync({
+                  fileName: f.name,
+                  contentBase64,
+                  contentType: f.type,
+                });
+                setUploadSuccess("QR code uploaded successfully.");
+              } catch (error) {
+                setUploadError(getErrorMessage(error));
               } finally {
                 setBusy(false);
+                e.target.value = "";
               }
             }}
           />

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { readLocalImage } from "./lib/local-storage";
 import { bodyLimit } from "hono/body-limit";
 import type { HttpBindings } from "@hono/node-server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -20,6 +21,21 @@ app.use("/api/trpc/*", async (c) => {
     createContext,
   });
 });
+
+app.get("/uploads/:key", async (c) => {
+  const image = await readLocalImage(c.req.param("key"));
+
+  if (!image) {
+    return c.json({ error: "Image not found" }, 404);
+  }
+
+  c.header("Content-Type", image.contentType);
+  c.header("Cache-Control", "public, max-age=3600");
+  c.header("X-Content-Type-Options", "nosniff");
+
+  return c.body(new Uint8Array(image.bytes));
+});
+
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createRouter, authedQuery, adminQuery } from "./middleware";
-import { storage } from "./lib/storage";
+import { saveLocalImage } from "./lib/local-storage";
 import { getDb } from "./queries/connection";
 import { hotEvents, paymentSettings } from "@db/schema";
 
@@ -15,16 +15,34 @@ const uploadInput = z.object({
 });
 
 async function decodeImage(input: z.infer<typeof uploadInput>) {
-  const bytes = Uint8Array.from(Buffer.from(input.contentBase64, "base64"));
-  if (bytes.length > MAX_BYTES) {
-    throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "Image must be under 5 MB" });
+  const bytes = Buffer.from(input.contentBase64, "base64");
+
+  if (bytes.length === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Image cannot be empty",
+    });
   }
-  const saved = await storage.uploadFile({
-    fileContent: bytes,
-    fileName: input.fileName,
-    contentType: input.contentType,
-  });
-  return saved;
+
+  if (bytes.length > MAX_BYTES) {
+    throw new TRPCError({
+      code: "PAYLOAD_TOO_LARGE",
+      message: "Image must be under 5 MB",
+    });
+  }
+
+  try {
+    return await saveLocalImage(
+      input.fileName,
+      bytes,
+      input.contentType,
+    );
+  } catch {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Unable to save image. Use a valid JPG, PNG, WebP, or GIF image.",
+    });
+  }
 }
 
 export const uploadsRouter = createRouter({
