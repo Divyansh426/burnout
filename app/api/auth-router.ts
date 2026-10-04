@@ -10,7 +10,7 @@ import { getSessionCookieOptions } from "./lib/cookies";
 import { createRouter, publicQuery, authedQuery } from "./middleware";
 import { findUserByEmail, upsertUser } from "./queries/users";
 import { signSessionToken } from "./kimi/session";
-import { env } from "./lib/env";
+
 
 function setSessionCookie(
   ctx: { req: { headers: Headers }; resHeaders: Headers },
@@ -70,7 +70,7 @@ export const authRouter = createRouter({
 
       const token = await signSessionToken({
         unionId,
-        clientId: env.appId || "local",
+        clientId: "local",
       });
 
       setSessionCookie(ctx, token);
@@ -102,7 +102,7 @@ export const authRouter = createRouter({
 
       const token = await signSessionToken({
         unionId: user.unionId,
-        clientId: env.appId || "local",
+        clientId: "local",
       });
 
       setSessionCookie(ctx, token);

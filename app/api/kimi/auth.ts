@@ -18,7 +18,7 @@ async function exchangeAuthCode(
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
-    client_id: env.appId,
+    clientId: "local",
     redirect_uri: redirectUri,
     client_secret: env.appSecret,
   });
@@ -118,7 +118,7 @@ export function createOAuthCallbackHandler() {
 
       const token = await signSessionToken({
         unionId: userId,
-        clientId: env.appId,
+        clientId: "local",
       });
 
       const cookieOpts = getSessionCookieOptions(c.req.raw.headers);
