@@ -1,8 +1,8 @@
-﻿{
+﻿
+{
   "version": 2,
   "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
-  "framework": "vite",
   "rewrites": [
     {
       "source": "/(.*)",
