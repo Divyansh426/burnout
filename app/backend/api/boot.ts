@@ -16,10 +16,11 @@ const app = new Hono<{ Bindings: HttpBindings }>();
 app.use(
   "/api/*",
   cors({
-    origin: [
-      "https://burnout-git-main-divyansh426s-projects.vercel.app",
-      "http://localhost:5173",
-    ],
+ origin: [
+  "https://burnout-git-main-divyansh426s-projects.vercel.app",
+  "https://burnout-gamma-ruby.vercel.app",
+  "http://localhost:5173",
+],
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
