@@ -17,6 +17,10 @@ import { ArrowRight, Flag, Timer, Trophy, Wrench, Instagram, MapPin, CalendarDay
 
 const DIVISIONS = [
   {
+    name: "DISCO",
+    desc: "The technical division focused on engineering, technical development, and supporting the club's automotive projects.",
+  },
+  {
     name: "BAJA",
     desc: "Off-road beasts built to survive the roughest terrain. Mud, jumps and punishment — the BAJA division thrives on it.",
   },
@@ -28,10 +32,7 @@ const DIVISIONS = [
     name: "AERO MODELING",
     desc: "RC aircraft that lift engineering into the sky. Lift, thrust and payload — designed, built and flown by students.",
   },
-  {
-    name: "DISCO",
-    desc: "The technical division focused on engineering, technical development, and supporting the club's automotive projects.",
-  },
+  
 ];
 
 const WHY_SPONSOR = [

@@ -150,7 +150,7 @@ export default function Register() {
                   onClick={() => navigate("/login")}
                   className="mt-6 bg-[#d2ff00] px-8 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-[#12140e]"
                 >
-                  Sign in with Kimi
+                  Sign in 
                 </button>
               </div>
             </Reveal>
