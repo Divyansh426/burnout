@@ -4,7 +4,7 @@ import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
 import { Reveal } from "@/components/Reveal";
-import { CheckCircle2, Clock, XCircle, Upload, Copy, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Upload, Loader2 } from "lucide-react";
 
 const BRANCHES = [
   "Mechanical Engineering",
@@ -52,21 +52,25 @@ export default function Register() {
     leaderRoll: "",
     leaderBranch: BRANCHES[0],
     leaderPhone: "",
+    secondMemberPhone: "",
     leaderEmail: "",
     member1Name: "",
     member1Roll: "",
+    member1Branch: BRANCHES[0],
     member2Name: "",
     member2Roll: "",
+    member2Branch: BRANCHES[0],
     member3Name: "",
     member3Roll: "",
+    member3Branch: BRANCHES[0],
     member4Name: "",
     member4Roll: "",
+    member4Branch: BRANCHES[0],
     transactionRef: "",
   });
   const [shot, setShot] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const memberCount = useMemo(
     () => [form.member1Name, form.member2Name, form.member3Name, form.member4Name].filter(Boolean).length,
@@ -81,6 +85,10 @@ export default function Register() {
     setError(null);
     if (!/^\d{10}$/.test(form.leaderPhone)) {
       setError("Leader phone must be exactly 10 digits.");
+      return;
+    }
+    if (!/^\d{10}$/.test(form.secondMemberPhone)) {
+      setError("Second team contact number must be exactly 10 digits.");
       return;
     }
     try {
@@ -134,7 +142,7 @@ export default function Register() {
         kicker="Grid Entry"
         title="Regis"
         accent="Ter"
-        subtitle="Sign in, fill your crew details, pay via UPI and upload the payment proof. Race control verifies every entry."
+        subtitle="Sign in, fill your crew details, make the payment using the bank details below and upload the payment proof. Race control verifies every entry."
       />
 
       <section className="px-4 py-16 sm:px-6">
@@ -173,14 +181,25 @@ export default function Register() {
                       {myReg.leaderRoll} · {myReg.leaderBranch}
                     </p>
                     <p className="text-sm text-[#6b705c]">{myReg.leaderPhone}</p>
+                    {myReg.secondMemberPhone && (
+                      <p className="text-sm text-[#6b705c]">Second contact: {myReg.secondMemberPhone}</p>
+                    )}
                   </div>
                   <div className="bg-[#12140e] p-6">
                     <p className={labelCls}>Crew Members</p>
-                    {[myReg.member1Name, myReg.member2Name, myReg.member3Name, myReg.member4Name]
-                      .filter(Boolean)
-                      .map((m) => (
-                        <p key={m} className="text-[#f4f4ed]">{m}</p>
-                      ))}
+                    {[
+                      { name: myReg.member1Name, roll: myReg.member1Roll, branch: myReg.member1Branch },
+                      { name: myReg.member2Name, roll: myReg.member2Roll, branch: myReg.member2Branch },
+                      { name: myReg.member3Name, roll: myReg.member3Roll, branch: myReg.member3Branch },
+                      { name: myReg.member4Name, roll: myReg.member4Roll, branch: myReg.member4Branch },
+                    ].filter((member) => member.name).map((member) => (
+                      <div key={`${member.name}-${member.roll}`} className="mb-3">
+                        <p className="text-[#f4f4ed]">{member.name}</p>
+                        <p className="text-sm text-[#6b705c]">
+                          {member.roll}{member.branch ? ` · ${member.branch}` : ""}
+                        </p>
+                      </div>
+                    ))}
                     {!myReg.member1Name && <p className="text-sm text-[#6b705c]">No additional members</p>}
                   </div>
                 </div>
@@ -244,6 +263,19 @@ export default function Register() {
                           maxLength={10}
                         />
                       </div>
+                      <div>
+                        <label className={labelCls}>Second Team Contact Number *</label>
+                        <input
+                          required
+                          type="tel"
+                          inputMode="numeric"
+                          className={inputCls}
+                          value={form.secondMemberPhone}
+                          onChange={set("secondMemberPhone")}
+                          placeholder="10-digit phone"
+                          maxLength={10}
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -259,13 +291,22 @@ export default function Register() {
                             <input
                               className={inputCls}
                               placeholder={`Member ${n} name`}
-                              value={form[`member${n}Name` as keyof typeof form]}
+                              value={form[`member${n}Name` as keyof typeof form] as string}
                               onChange={set(`member${n}Name` as keyof typeof form)}
                             />
+                            <select
+                              className={inputCls}
+                              value={form[`member${n}Branch` as keyof typeof form] as string}
+                              onChange={set(`member${n}Branch` as keyof typeof form)}
+                            >
+                              {BRANCHES.map((branch) => (
+                                <option key={branch}>{branch}</option>
+                              ))}
+                            </select>
                             <input
                               className={inputCls}
                               placeholder={`Member ${n} roll no.`}
-                              value={form[`member${n}Roll` as keyof typeof form]}
+                              value={form[`member${n}Roll` as keyof typeof form] as string}
                               onChange={set(`member${n}Roll` as keyof typeof form)}
                             />
                           </div>
@@ -275,7 +316,7 @@ export default function Register() {
 
                     <div className="border-t border-border pt-5">
                       <label className={labelCls}>Transaction Reference / UTR</label>
-                      <input className={inputCls} value={form.transactionRef} onChange={set("transactionRef")} placeholder="UPI transaction ID" />
+                      <input className={inputCls} value={form.transactionRef} onChange={set("transactionRef")} placeholder="Transaction ID / UTR" />
                     </div>
 
                     <div>
@@ -320,45 +361,20 @@ export default function Register() {
                 <aside className="border border-border bg-[#0c0e09] p-6">
                   <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#6b705c]">Payment Bay</p>
                   <p className="font-display mt-2 text-3xl text-[#d2ff00]">
-                    {pay?.registrationFee ?? "₹3000"}
+                    {pay?.registrationFee ?? "₹2999"}
                   </p>
                   <p className="text-xs uppercase tracking-wider text-[#6b705c]">registration fee</p>
 
-                  {pay?.qrUrl ? (
-                    <img src={pay.qrUrl} alt="UPI QR code" className="mt-5 w-full border border-border" />
-                  ) : (
-                    <div className="speedlines mt-5 flex h-44 items-center justify-center border border-border text-xs uppercase tracking-wider text-[#6b705c]">
-                      QR published by admin
-                    </div>
-                  )}
-
-                  <div className="mt-5 space-y-3 text-sm">
-                    {pay?.upiId && (
-                      <div className="flex items-center justify-between border border-border bg-[#12140e] px-3 py-2.5">
-                        <span className="truncate text-[#f4f4ed]">{pay.upiId}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(pay.upiId ?? "");
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 1500);
-                          }}
-                          className="ml-2 flex items-center gap-1 text-xs font-bold uppercase text-[#d2ff00]"
-                        >
-                          <Copy className="h-3.5 w-3.5" /> {copied ? "Copied" : "Copy"}
-                        </button>
-                      </div>
-                    )}
-                    {pay?.accountNumber && (
-                      <p className="text-[#b4b8a5]">
-                        A/C <span className="text-[#f4f4ed]">{pay.accountNumber}</span>
-                        {pay.ifsc ? ` · IFSC ${pay.ifsc}` : ""}
-                      </p>
-                    )}
-                    {pay?.bankName && <p className="text-xs text-[#6b705c]">{pay.bankName}{pay.accountHolder ? ` · ${pay.accountHolder}` : ""}</p>}
+                  <div className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
+                    <p className="text-[#b4b8a5]"><span className="font-bold text-[#f4f4ed]">Account Holder:</span>{" "}{pay?.accountHolder || "Update from Admin Panel"}</p>
+                    <p className="text-[#b4b8a5]"><span className="font-bold text-[#f4f4ed]">Account Number:</span>{" "}{pay?.accountNumber || "Update from Admin Panel"}</p>
+                    <p className="text-[#b4b8a5]"><span className="font-bold text-[#f4f4ed]">IFSC:</span>{" "}{pay?.ifsc || "Update from Admin Panel"}</p>
+                    {pay?.bankName && <p className="text-xs text-[#6b705c]">{pay.bankName}</p>}
                   </div>
                   <p className="mt-5 border-t border-border pt-4 text-xs leading-relaxed text-[#6b705c]">
-                    Pay first, then attach the screenshot and transaction reference in the form.
+                    Please verify the bank details carefully before making the payment.
+                    Payment is the responsibility of the participant/team.
+                    After payment, attach the screenshot and transaction reference in the form.
                     Registrations without valid proof stay pending.
                   </p>
                 </aside>

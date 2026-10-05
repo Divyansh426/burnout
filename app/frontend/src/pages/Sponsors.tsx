@@ -1,8 +1,7 @@
-
 import { trpc } from "@/providers/trpc";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
 import { Reveal } from "@/components/Reveal";
-import { Handshake, ExternalLink, Mail } from "lucide-react";
+import { Handshake, ExternalLink, Mail, Phone } from "lucide-react";
 
 export default function Sponsors() {
   const { data: sponsors, isLoading } =
@@ -82,29 +81,6 @@ export default function Sponsors() {
                 <SponsorCard s={s} large />
               </Reveal>
             ))}
-
-            {/* Demo sponsor — independent of database data */}
-            <Reveal>
-              <article className="group flex min-h-[220px] flex-col items-center justify-center border border-dashed border-[#d2ff00]/40 bg-[#171a10] p-8 text-center transition-colors hover:border-[#d2ff00]/60">
-                <img
-                  src="/images/apex-motors.svg"
-                  alt="Apex Motors logo"
-                  className="mb-5 h-16 max-w-[180px] object-contain"
-                />
-
-                <span className="font-display text-3xl uppercase leading-tight text-[#f4f4ed] transition-colors group-hover:text-[#d2ff00]">
-                  Apex Motors
-                </span>
-
-                <span className="mt-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[#d2ff00]">
-                  Example Sponsor
-                </span>
-
-                <span className="mt-2 text-sm text-[#6b705c]">
-                  Demo entry — not an official sponsor
-                </span>
-              </article>
-            </Reveal>
           </div>
 
           {/* Small Sponsors */}
@@ -130,7 +106,7 @@ export default function Sponsors() {
 
               <ul className="mt-6 space-y-3 text-sm leading-relaxed text-[#b4b8a5]">
                 <li>
-                  → 1000+ live footfall at TechSrijan — engineering students,
+                  → 1000+ live footfall at Burnout — engineering students,
                   faculty and motorsport fans.
                 </li>
                 <li>
@@ -138,12 +114,11 @@ export default function Sponsors() {
                   and event livestream.
                 </li>
                 <li>
-                  → Direct access to MMMUT's mechanical, electrical, and CS
+                  → Direct access to MMMUT&apos;s mechanical, electrical, and CS
                   talent pool.
                 </li>
                 <li>
-                  → Amplification across SAE MMMUT and TechSrijan social
-                  channels.
+                  → Amplification across SAE MMMUT social channels.
                 </li>
               </ul>
             </div>
@@ -156,17 +131,57 @@ export default function Sponsors() {
               </p>
 
               <p className="mt-2 text-sm text-[#b4b8a5]">
-                Reach our sponsorship coordinators — Shreyansh Singh Sengar &amp;
-                Kabir.
+                Reach our sponsorship coordinators — Shreyansh Singh Sengar &
+                Siddhartha Shukla.
               </p>
 
-              <a
-                href="mailto:abhinavpratapsingh010@gmail.com"
-                className="mt-5 inline-flex items-center gap-2 bg-[#d2ff00] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[#12140e] transition-transform hover:-translate-y-0.5"
-              >
-                <Mail className="h-4 w-4" />
-                Get in touch
-              </a>
+              <div className="mt-5 flex flex-col gap-3">
+                {/* Siddhartha Shukla */}
+                <div className="border border-[#d2ff00]/40 bg-[#171a10] p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d2ff00]">
+                    Siddhartha Shukla
+                  </p>
+
+                  <a
+                    href="mailto:siddhartha.shukla0401@gmail.com"
+                    className="mt-2 flex items-center gap-2 text-sm text-[#f4f4ed] transition-colors hover:text-[#d2ff00]"
+                  >
+                    <Mail className="h-4 w-4 shrink-0" />
+                    siddhartha.shukla0401@gmail.com
+                  </a>
+
+                  <a
+                    href="tel:YOUR_SIDDHARTHA_PHONE"
+                    className="mt-2 flex items-center gap-2 text-sm text-[#b4b8a5] transition-colors hover:text-[#d2ff00]"
+                  >
+                    <Phone className="h-4 w-4 shrink-0" />
+                    9415605275
+                  </a>
+                </div>
+
+                {/* Shreyansh Singh Sengar */}
+                <div className="border border-[#d2ff00]/40 bg-[#171a10] p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#d2ff00]">
+                    Shreyansh Singh Sengar
+                  </p>
+
+                  <a
+                    href="mailto:iamsengar1114@gmail.com"
+                    className="mt-2 flex items-center gap-2 text-sm text-[#f4f4ed] transition-colors hover:text-[#d2ff00]"
+                  >
+                    <Mail className="h-4 w-4 shrink-0" />
+                    iamsengar1114@gmail.com
+                  </a>
+
+                  <a
+                    href="tel:YOUR_SHREYANSH_PHONE"
+                    className="mt-2 flex items-center gap-2 text-sm text-[#b4b8a5] transition-colors hover:text-[#d2ff00]"
+                  >
+                    <Phone className="h-4 w-4 shrink-0" />
+                    7084460758
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
