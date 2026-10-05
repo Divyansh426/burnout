@@ -6,6 +6,8 @@ COPY package.json package-lock.json ./
 
 RUN npm install --include=dev --legacy-peer-deps --no-audit --no-fund
 
+RUN npm install @rollup/rollup-linux-x64-gnu --save-dev --legacy-peer-deps
+
 COPY . .
 
 RUN npm run build
