@@ -16,15 +16,13 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
+      "@/*": ["./frontend/src/*"],
       "@contracts/*": [
         "./contracts/*"
       ],
       "@db/*": [
-        "./db/*"
-      ]
+  "./backend/db/*"
+]
     },
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -39,7 +37,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["frontend/src"]
 }
