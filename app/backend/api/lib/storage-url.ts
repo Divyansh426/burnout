@@ -3,5 +3,8 @@ export async function storageUrl(
 ): Promise<string | null> {
   if (!key) return null;
 
-  return `/uploads/${encodeURIComponent(key)}`;
+  const baseUrl =
+    process.env.PUBLIC_API_URL || "http://localhost:3000";
+
+  return `${baseUrl}/uploads/${encodeURIComponent(key)}`;
 }
