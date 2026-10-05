@@ -1,4 +1,6 @@
+
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { readLocalImage } from "./lib/local-storage";
 import { bodyLimit } from "hono/body-limit";
 import type { HttpBindings } from "@hono/node-server";
@@ -10,6 +12,19 @@ import { createOAuthCallbackHandler } from "./kimi/auth";
 import { Paths } from "@contracts/constants";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
+
+app.use(
+  "/api/*",
+  cors({
+    origin: [
+      "https://burnout-git-main-divyansh426s-projects.vercel.app",
+      "http://localhost:5173",
+    ],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.get(Paths.oauthCallback, createOAuthCallbackHandler());
