@@ -38,14 +38,14 @@ const POSTHOLDER_EXAMPLES = [
   {
     name: "Hemant Gupta",
     branch: "Civil Engineering",
-    post: "Social Media and Publicity Head",
+    post: "Student Publicity Chair",
     email: "ghemant683@gmail.com",
     photo: "/images/postholders/hemant-gupta.jpg",
   },
   {
     name: "Shreyansh Singh Sengar",
     branch: "Mechanical Engineering",
-    post: "Social Media and Publicity Head",
+    post: "Student Publicity Chair",
     email: "iamsengar1114@gmail.com",
     photo: "/images/postholders/sengar.jpeg",
   },

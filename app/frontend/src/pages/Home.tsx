@@ -100,7 +100,7 @@ export default function Home() {
               </p>
               <ul className="mt-4 space-y-4 text-sm">
                 <li className="flex items-center gap-3 text-[#f4f4ed]">
-                  <CalendarDays className="h-4 w-4 text-[#d2ff00]" /> Annual Tech Fest
+                  <CalendarDays className="h-4 w-4 text-[#d2ff00]" /> RC Racing 
                 </li>
                 <li className="flex items-center gap-3 text-[#f4f4ed]">
                   <MapPin className="h-4 w-4 text-[#d2ff00]" /> MMMUT Campus, Gorakhpur
@@ -182,36 +182,7 @@ export default function Home() {
         ]}
       />
 
-      {/* ============ ABOUT / DIVISIONS ============ */}
-      <section className="relative px-4 py-24 sm:px-6">
-        <div className="mx-auto max-w-7xl">
-          <Reveal>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#d2ff00]">The Club</p>
-            <h2 className="font-display mt-3 max-w-3xl text-[clamp(2.2rem,5.5vw,4.5rem)] uppercase leading-[0.9] text-[#f4f4ed]">
-              Society of Automotive <span className="text-stroke">Engineers</span>
-            </h2>
-            <p className="mt-6 max-w-2xl text-[#b4b8a5]">
-              The SAE Collegiate Club at MMMUT Gorakhpur is where classroom theory meets the
-              workshop floor. Four competitive divisions, one obsession: machines that move.
-            </p>
-          </Reveal>
-
-          <div className="mt-14 grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2">
-            {DIVISIONS.map((d, i) => (
-              <Reveal key={d.name} delay={i * 120}>
-                <div className="group relative flex min-h-[280px] h-full flex-col bg-[#171a10] p-6 transition-colors hover:bg-[#1c2013] sm:p-8 lg:p-10">
-                  <span className="font-display text-5xl text-stroke-faint transition-colors group-hover:text-stroke">
-                    0{i + 1}
-                  </span>
-                  <h3 className="font-display mt-8 text-2xl uppercase text-[#f4f4ed]">{d.name}</h3>
-                  <p className="mt-4 max-w-xl text-sm leading-7 text-[#b4b8a5] sm:text-base">{d.desc}</p>
-                  <div className="mt-auto h-1 w-12 bg-[#d2ff00] transition-all duration-300 group-hover:w-20" />
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* ============ HOT EVENTS ============ */}
       <section className="diagonal-top relative bg-[#0c0e09] px-4 pb-24 pt-32 sm:px-6">
