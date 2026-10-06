@@ -69,8 +69,8 @@ async function seed() {
   await db.insert(hotEvents).values([
     {
       name: "BURNOUT — RC Racing Showdown",
-      description: "The flagship RC car racing event of TechSrijan. Build, tune and race your RC machine through qualifiers, durability runs and the grand final. 325 points separate the podium from the pack.",
-      eventDate: "TechSrijan · Main Arena",
+      description: " Build, tune and race your RC machine through qualifiers, durability runs and the grand final. 325 points separate the podium from the pack.",
+      eventDate: "Main Arena",
       venue: "MMMUT Campus, Gorakhpur",
       showOnHomepage: true,
     },

@@ -39,7 +39,7 @@ const WHY_SPONSOR = [
   "Direct reach to 1000+ live footfall of engineering students and motorsport fans",
   "Brand placement on track banners, team kits and the event livestream",
   "Recruitment access to MMMUT's top mechanical, electrical and CS talent",
-  "Social media amplification across SAE MMMUT and TechSrijan channels",
+  "Social media amplification across SAE MMMUT ",
 ];
 
 export default function Home() {
@@ -58,7 +58,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="live-dot h-2.5 w-2.5 rounded-full bg-[#d2ff00]" />
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#d2ff00]">
-              SAE Collegiate Club · MMMUT · TechSrijan
+              SAE Collegiate Club · MMMUT 
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export default function Home() {
             <div>
               <p className="max-w-xl text-base leading-relaxed text-[#b4b8a5] sm:text-lg">
                 Build it. Tune it. Race it. Burnout is the flagship RC racing showdown of
-                TechSrijan at Madan Mohan Malviya University of Technology — 325 points of
+                SAE Collegiate Club  at Madan Mohan Malviya University of Technology — 325 points of
                 speed, durability and pure engineering between you and the podium.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
@@ -100,7 +100,7 @@ export default function Home() {
               </p>
               <ul className="mt-4 space-y-4 text-sm">
                 <li className="flex items-center gap-3 text-[#f4f4ed]">
-                  <CalendarDays className="h-4 w-4 text-[#d2ff00]" /> TechSrijan · Annual Tech Fest
+                  <CalendarDays className="h-4 w-4 text-[#d2ff00]" /> Annual Tech Fest
                 </li>
                 <li className="flex items-center gap-3 text-[#f4f4ed]">
                   <MapPin className="h-4 w-4 text-[#d2ff00]" /> MMMUT Campus, Gorakhpur
@@ -139,7 +139,7 @@ export default function Home() {
       </p>
 
       <p className="mt-3 text-xs uppercase tracking-wider text-[#6b705c]">
-        SAE Collegiate Club · MMMUT Chapter
+        SAE Collegiate Club 
       </p>
     </div>
 
@@ -172,8 +172,8 @@ export default function Home() {
         items={[
           "Burnout",
           "SAE",
-          "MMMUT Chapter",
-          "TechSrijan",
+          "MMMUT",
+          
           "Disco",
           "BAJA ",
           "SUPRA ",
@@ -355,7 +355,7 @@ export default function Home() {
             </h2>
             <p className="mt-6 max-w-md text-[#b4b8a5]">
               Burnout puts your brand in front of hundreds of engineers mid-throttle — at
-              TechSrijan, across campus, and online.
+              across campus, and online.
             </p>
             <Link
               to="/sponsors"

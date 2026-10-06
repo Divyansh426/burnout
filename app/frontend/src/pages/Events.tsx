@@ -2,7 +2,8 @@ import { Link } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
 import { Reveal } from "@/components/Reveal";
-import { Flag, Images, Instagram } from "lucide-react";
+import { Flag, Images, Instagram } from "lucide-react"
+
 
 export default function Events() {
   const { data: events, isLoading } = trpc.events.list.useQuery();
@@ -27,8 +28,7 @@ export default function Events() {
             ))}
 
           {events?.map((e, i) => {
-            const isBurnout =
-              e.name.trim().toLowerCase() === "burnout";
+            const isBurnout = e.name.trim().toLowerCase().includes("burnout");
 
             return (
               <Reveal key={e.id} delay={(i % 3) * 100}>
@@ -64,14 +64,14 @@ export default function Events() {
 
                     <div className="mt-4 flex flex-wrap items-center gap-4">
                       {isBurnout && (
-                        <Link
-                          to="/burnout-gallery"
-                          className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#d2ff00] hover:text-[#f4f4ed]"
-                        >
-                          <Images className="h-4 w-4" />
-                          Gallery
-                        </Link>
-                      )}
+  <Link
+    to="/burnout-gallery"
+    className="inline-flex items-center gap-2 border border-[#d2ff00] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#d2ff00] transition hover:bg-[#d2ff00] hover:text-black"
+  >
+    <Images className="h-4 w-4" />
+    Gallery
+  </Link>
+)}
 
                       {e.instagramReel && (
                         <a

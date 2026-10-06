@@ -13,8 +13,8 @@ const links = [
 ];
 
 // Update these two numbers later.
-const CONTACT_PHONE_1 = "";
-const CONTACT_PHONE_2 = "";
+const CONTACT_PHONE_1 = "7084460758";
+const CONTACT_PHONE_2 = "6394735709";
 
 const CONTACT_EMAIL = "saecollegiateclub.mmmut@gmail.com";
 
@@ -84,21 +84,21 @@ export function Navbar() {
                   {CONTACT_EMAIL}
                 </a>
 
-                <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm text-[#b4b8a5]">
-                  <p>
-                    <span className="font-semibold text-[#f4f4ed]">
-                      Phone 1:
-                    </span>{" "}
-                    {CONTACT_PHONE_1 || "Update number"}
-                  </p>
+              <div className="mt-4 space-y-2 border-t border-border pt-4 text-sm text-[#b4b8a5]">
+  <p>
+    <span className="font-semibold text-[#f4f4ed]">
+      Phone 1:
+    </span>{" "}
+    {CONTACT_PHONE_1}
+  </p>
 
-                  <p>
-                    <span className="font-semibold text-[#f4f4ed]">
-                      Phone 2:
-                    </span>{" "}
-                    {CONTACT_PHONE_2 || "Update number"}
-                  </p>
-                </div>
+  <p>
+    <span className="font-semibold text-[#f4f4ed]">
+      Phone 2:
+    </span>{" "}
+    {CONTACT_PHONE_2}
+  </p>
+</div>
               </div>
             )}
           </div>
@@ -185,14 +185,14 @@ export function Navbar() {
               </a>
 
               <p className="mt-2 text-sm text-[#b4b8a5]">
-                <span className="font-semibold text-[#f4f4ed]">Phone 1:</span>{" "}
-                {CONTACT_PHONE_1 || "Update number"}
-              </p>
+  <span className="font-semibold text-[#f4f4ed]">Phone 1:</span>{" "}
+  {CONTACT_PHONE_1}
+</p>
 
-              <p className="mt-2 text-sm text-[#b4b8a5]">
-                <span className="font-semibold text-[#f4f4ed]">Phone 2:</span>{" "}
-                {CONTACT_PHONE_2 || "Update number"}
-              </p>
+<p className="mt-2 text-sm text-[#b4b8a5]">
+  <span className="font-semibold text-[#f4f4ed]">Phone 2:</span>{" "}
+  {CONTACT_PHONE_2}
+</p>
             </div>
 
             <div className="flex gap-3 py-4">

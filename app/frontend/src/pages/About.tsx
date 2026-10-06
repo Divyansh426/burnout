@@ -28,6 +28,13 @@ const POSTHOLDER_EXAMPLES = [
     email: "gauravgaurav200356@gmail.com",
     photo: "/images/postholders/gaurav.jpg",
   },
+   {
+    name: "Divyansh Singh",
+    branch: "Civil Engineering",
+    post: "Student Co-Treasurer",
+    email: "ghemant683@gmail.com",
+    photo: "/images/postholders/divyansh.jpeg",
+  },
   {
     name: "Hemant Gupta",
     branch: "Civil Engineering",
@@ -195,45 +202,55 @@ export default function About() {
         </div>
       </section>
 
-      {/* SAE SUBDIVISIONS */}
-      <section className="px-4 pb-14 sm:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8">
-            <p className="font-display text-xs uppercase tracking-[0.18em] text-[#d2ff00]">
-              SAE MMMUT
-            </p>
+    {/* SAE SUBDIVISIONS */}
+<section className="px-4 pb-14 sm:px-6">
+  <div className="mx-auto max-w-5xl">
+    <div className="mb-8">
+      <p className="font-display text-xs uppercase tracking-[0.18em] text-[#d2ff00]">
+        SAE MMMUT
+      </p>
 
-            <h2 className="mt-3 font-display text-3xl uppercase text-[#f4f4ed] sm:text-4xl">
-              Our Subdivisions
-            </h2>
+      <h2 className="mt-3 font-display text-3xl uppercase text-[#f4f4ed] sm:text-4xl">
+        Our Subdivisions
+      </h2>
 
-            <p className="mt-4 max-w-2xl leading-7 text-[#b4b8a5]">
-              SAE Collegiate Club MMMUT brings together students through its
-              technical and automotive-focused subdivisions.
-            </p>
+      <p className="mt-4 max-w-2xl leading-7 text-[#b4b8a5]">
+        SAE Collegiate Club MMMUT brings together students through its
+        technical and automotive-focused subdivisions.
+      </p>
+    </div>
+
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {SUBDIVISIONS.map((subdivision) => {
+        const logoMap: Record<string, string> = {
+          Disco: "/images/subdivisions/disco.jpeg",
+          Supra: "/images/subdivisions/supra.jpeg",
+          Baja: "/images/subdivisions/baja.jpeg",
+          AeroModeling: "/images/subdivisions/aeromodeling.jpeg",
+        };
+
+        return (
+          <div
+            key={subdivision}
+            className="border border-border bg-[#171a10] p-5"
+          >
+            <div className="flex aspect-square items-center justify-center overflow-hidden border border-border bg-[#0c0e09]">
+              <img
+                src={logoMap[subdivision]}
+                alt={`${subdivision} subdivision logo`}
+                className="h-full w-full object-contain p-4"
+              />
+            </div>
+
+            <h3 className="mt-5 font-display text-xl uppercase text-[#f4f4ed]">
+              {subdivision}
+            </h3>
           </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {SUBDIVISIONS.map((subdivision) => (
-              <div
-                key={subdivision}
-                className="border border-border bg-[#171a10] p-5"
-              >
-                {/* Temporary logo space */}
-                <div className="flex aspect-square items-center justify-center border border-dashed border-border bg-[#0c0e09]">
-                  <span className="text-center text-xs uppercase tracking-[0.14em] text-[#6b705c]">
-                    Logo to be added
-                  </span>
-                </div>
-
-                <h3 className="mt-5 font-display text-xl uppercase text-[#f4f4ed]">
-                  {subdivision}
-                </h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        );
+      })}
+    </div>
+  </div>
+</section>
 
       {/* FACULTY & TEAM */}
       <section className="px-4 pb-14 sm:px-6">

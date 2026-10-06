@@ -26,11 +26,11 @@ export default function Creators() {
     photoUrl: "/images/navneet.jpeg",
   },
   {
-    name: "Jagriti",
+    name: "Jagriti Yadav",
     photoUrl: "/images/jagriti.jpeg",
   },
   {
-    name: "Vartika",
+    name: "Vartika Singh",
     photoUrl: "/images/vartika.jpeg",
   },
   {

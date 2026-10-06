@@ -3,7 +3,6 @@ export const EVENT_INFO = {
   eventName: "BURNOUT",
   organiser: "SAE Collegiate Club MMMUT (Society of Automotive Engineers)",
   university: "Madan Mohan Malviya University of Technology, Gorakhpur",
-  festival: "TechSrijan",
   tagline: "RC racing. Engineering. Glory.",
   divisions: ["BAJA SAE", "SUPRA SAE", "AERO DESIGN"],
   teamSize: "2–5 members (1 leader + up to 4 members)",
@@ -20,7 +19,7 @@ scoring: {
 
 export const EVENT_KNOWLEDGE = `
 EVENT: BURNOUT — the flagship RC car racing event organised by the SAE Collegiate Club of
-Madan Mohan Malviya University of Technology (MMMUT), Gorakhpur, during the annual tech fest 'TechSrijan'.
+Madan Mohan Malviya University of Technology (MMMUT), Gorakhpur.
 
 ABOUT SAE MMMUT: The Society of Automotive Engineers (SAE) Collegiate Club at MMMUT runs three
 competitive divisions: BAJA SAE (off-road buggy), SUPRA SAE (formula-style car) and AERO DESIGN
