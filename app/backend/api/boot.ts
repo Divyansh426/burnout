@@ -20,6 +20,7 @@ app.use(
   "https://burnout-git-main-divyansh426s-projects.vercel.app",
   "https://burnout-gamma-ruby.vercel.app",
   "http://localhost:5173",
+  "https://sae-burnout.vercel.app",
 ],
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
