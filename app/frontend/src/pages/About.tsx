@@ -99,6 +99,13 @@ const POSTHOLDER_EXAMPLES = [
     photo: "/images/postholders/amit-chaurasiya.jpg",
   },
   {
+    name: "Rohit Pandey",
+    branch: "Mechanical Engineering",
+    post: "Student Membership Chair",
+    email: "amitchaurasiya1002@gmail.com",
+    photo: "/images/postholders/rohit.jpeg",
+  },
+  {
     name: "Anju Chaudhary",
     branch: "Mechanical",
     post: "Student Program Chair",
