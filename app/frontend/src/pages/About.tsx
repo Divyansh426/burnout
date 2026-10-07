@@ -14,6 +14,13 @@ const POSTHOLDER_EXAMPLES = [
     email: "millindsankhwar29@gmail.com",
     photo: "/images/postholders/millind-sankhwar.jpg",
   },
+   {
+    name: "Ankit Yadav",
+    branch: "Mechanical Engineering",
+    post: "Vice Chairperson",
+    email: "millindsankhwar29@gmail.com",
+    photo: "/images/postholders/ankit.png",
+  },
   {
     name: "Prakhar Dubey",
     branch: "Mechanical Engineering",
