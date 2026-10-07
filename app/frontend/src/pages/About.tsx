@@ -131,7 +131,7 @@ const POSTHOLDER_EXAMPLES = [
 const FACULTY_EXAMPLES = [
      {
     name: "Sanjay Mishra",
-    post: "Head of Departmenty, Mechanical Engineering",
+    post: "Head of Department, Mechanical Engineering",
     branch: "SAE Collegiate Club MMMUT",
     photo: "/images/faculty/sanjay-mishra.jpg",
   },
