@@ -41,6 +41,10 @@ export default function Creators() {
     name: "Shweta Singh",
     photoUrl: "/images/shweta.jpeg",
   },
+   {
+    name: "Aditya Kumar",
+    photoUrl: "/images/aditya.jpeg",
+  },
 ];
 
   return (
