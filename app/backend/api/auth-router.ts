@@ -7,10 +7,18 @@ import { TRPCError } from "@trpc/server";
 
 import { Session } from "@contracts/constants";
 import { getSessionCookieOptions } from "./lib/cookies";
-import { createRouter, publicQuery, authedQuery } from "./middleware";
-import { findUserByEmail, upsertUser } from "./queries/users";
+import {
+  createRouter,
+  publicQuery,
+  authedQuery,
+  adminQuery,
+} from "./middleware";
+import {
+  findUserByEmail,
+  upsertUser,
+  updateUserPasswordHash,
+} from "./queries/users";
 import { signSessionToken } from "./kimi/session";
-
 
 function setSessionCookie(
   ctx: { req: { headers: Headers }; resHeaders: Headers },
@@ -106,6 +114,32 @@ export const authRouter = createRouter({
       });
 
       setSessionCookie(ctx, token);
+
+      return { success: true };
+    }),
+
+  // Admin-only recovery for an existing account.
+  adminResetPassword: adminQuery
+    .input(
+      z.object({
+        email: emailSchema,
+        temporaryPassword: z.string().min(12).max(72),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const email = input.email.toLowerCase();
+      const user = await findUserByEmail(email);
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No account was found with that email address.",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(input.temporaryPassword, 12);
+
+      await updateUserPasswordHash(user.id, passwordHash);
 
       return { success: true };
     }),

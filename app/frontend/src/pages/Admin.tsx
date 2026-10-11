@@ -14,13 +14,20 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  KeyRound,
 } from "lucide-react";
 
 const inputCls =
   "h-11 w-full border border-border bg-[#12140e] px-3 text-sm text-[#f4f4ed] outline-none placeholder:text-[#6b705c] focus:border-[#d2ff00]";
 const labelCls = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.18em] text-[#b4b8a5]";
 
-type Tab = "dashboard" | "events" | "registrations" | "points" | "payment";
+type Tab =
+  | "dashboard"
+  | "events"
+  | "registrations"
+  | "points"
+  | "payment"
+  | "accounts";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -85,6 +92,7 @@ export default function Admin() {
     ["registrations", "Registrations", <Users className="h-4 w-4" />],
     ["points", "Points", <Trophy className="h-4 w-4" />],
     ["payment", "QR & UPI", <QrCode className="h-4 w-4" />],
+    ["accounts", "Account Recovery", <KeyRound size={18} />],
   ];
 
   return (
@@ -114,6 +122,7 @@ export default function Admin() {
             {tab === "registrations" && <RegistrationsAdmin />}
             {tab === "points" && <PointsAdmin />}
             {tab === "payment" && <PaymentAdmin />}
+            {tab === "accounts" && <AccountsAdmin />}
           </div>
         </div>
       </section>
@@ -339,6 +348,133 @@ function EventsAdmin() {
     </div>
   );
 }
+
+
+function AccountsAdmin() {
+  const [email, setEmail] = useState("");
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [message, setMessage] = useState("");
+const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+
+  const resetPassword = trpc.auth.adminResetPassword.useMutation({
+  onSuccess: () => {
+    setMessageType("success");
+    setMessage(
+      "Password reset successfully. Share the temporary password privately."
+    );
+    setTemporaryPassword("");
+  },
+  onError: (error) => {
+    setMessageType("error");
+    setMessage(error.message || "Unable to reset the password.");
+  },
+});
+
+  function handleReset(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+setMessageType("");
+
+    if (!email.trim() || !temporaryPassword) {
+      setMessage("Enter the account email and a temporary password.");
+      return;
+    }
+
+    if (temporaryPassword.length < 12) {
+      setMessage("Temporary password must be at least 12 characters.");
+      return;
+    }
+
+    if (!window.confirm(
+      "Confirm that you have verified this person's identity before resetting their password."
+    )) {
+      return;
+    }
+
+    resetPassword.mutate({
+      email: email.trim(),
+      temporaryPassword,
+    });
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Account Recovery</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Reset an existing user's password without deleting their account
+          or changing their team registration.
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-border p-4">
+        <p className="mb-4 text-sm">
+          Verify the user's identity through SAE team or registration
+          details before resetting their password. Communicate the
+          temporary password privately.
+        </p>
+
+        <form onSubmit={handleReset} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="recovery-email" className="text-sm font-medium">
+              Existing account email
+            </label>
+            <input
+              id="recovery-email"
+              type="email"
+              autoComplete="off"
+              required
+              maxLength={320}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="user@example.com"
+              className="w-full rounded-md border border-border bg-background px-3 py-2"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="temporary-password" className="text-sm font-medium">
+              Temporary password
+            </label>
+            <input
+              id="temporary-password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={12}
+              maxLength={72}
+              value={temporaryPassword}
+              onChange={(event) => setTemporaryPassword(event.target.value)}
+              placeholder="At least 12 characters"
+              className="w-full rounded-md border border-border bg-background px-3 py-2"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={resetPassword.isPending}
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+          >
+            {resetPassword.isPending ? "Resetting..." : "Reset password"}
+          </button>
+
+          {message && (
+  <p
+    role={messageType === "error" ? "alert" : "status"}
+    aria-live="polite"
+    className={`text-sm ${
+      messageType === "success" ? "text-[#d2ff00]" : "text-[#ff6b4a]"
+    }`}
+  >
+    {message}
+  </p>
+)}
+        </form>
+      </div>
+    </div>
+  );
+}
+
 
 /* ================= REGISTRATIONS ================= */
 

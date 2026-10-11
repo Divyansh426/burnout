@@ -41,7 +41,11 @@ export default function Login() {
     setError("");
 
     if (isRegister) {
-      register.mutate({ name: name.trim(), email: email.trim(), password });
+      register.mutate({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
     } else {
       login.mutate({ email: email.trim(), password });
     }
@@ -52,7 +56,10 @@ export default function Login() {
       <div className="w-full max-w-sm border border-border bg-[#0c0e09] p-8">
         <Link to="/" className="flex items-center justify-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center bg-[#d2ff00]">
-            <Gauge className="h-5 w-5 text-[#12140e]" strokeWidth={2.5} />
+            <Gauge
+              className="h-5 w-5 text-[#12140e]"
+              strokeWidth={2.5}
+            />
           </span>
           <span className="font-display text-3xl uppercase text-[#f4f4ed]">
             Burn<span className="text-[#d2ff00]">out</span>
@@ -117,13 +124,25 @@ export default function Login() {
               maxLength={72}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isRegister ? "At least 8 characters" : "Your password"}
+              placeholder={
+                isRegister ? "At least 8 characters" : "Your password"
+              }
               className="w-full border border-[#34382a] bg-[#15180f] px-3 py-3 text-sm text-[#f4f4ed] outline-none focus:border-[#d2ff00]"
             />
           </div>
 
+          {!isRegister && (
+            <p className="text-sm leading-relaxed text-[#b4b8a5]">
+              Forgot your password? Contact an SAE admin from the contact us (phone 2) to verify your
+              registration and reset your password.
+            </p>
+          )}
+
           {error && (
-            <p role="alert" className="border border-red-900 bg-red-950/30 p-3 text-sm text-red-300">
+            <p
+              role="alert"
+              className="border border-red-900 bg-red-950/30 p-3 text-sm text-red-300"
+            >
               {error}
             </p>
           )}

@@ -192,7 +192,7 @@ export function Navbar() {
 <p className="mt-2 text-sm text-[#b4b8a5]">
   <span className="font-semibold text-[#f4f4ed]">Phone 2:</span>{" "}
   {CONTACT_PHONE_2}
-</p>
+</p> 
             </div>
 
             <div className="flex gap-3 py-4">

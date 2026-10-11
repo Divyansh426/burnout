@@ -47,3 +47,21 @@ export async function upsertUser(data: InsertUser) {
     .values(values)
     .onDuplicateKeyUpdate({ set: updateSet });
 }
+
+/**
+ * Updates the password hash for an existing account.
+ * The caller must hash the password before calling this function.
+ */
+
+export async function updateUserPasswordHash(
+  userId: typeof schema.users.$inferSelect.id,
+  passwordHash: string
+) {
+  await getDb()
+    .update(schema.users)
+    .set({
+      passwordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.users.id, userId));
+}
