@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { desc, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -40,9 +41,48 @@ const registrationInput = z.object({
   member4Roll: z.string().max(50).optional().or(z.literal("")),
   member4Branch: z.string().max(255).optional().or(z.literal("")),
 
-  paymentScreenshotKey: z.string().max(512).optional().or(z.literal("")),
+  paymentScreenshotKey: z
+    .string()
+    .min(1, "Payment screenshot is required")
+    .max(512),
+
   transactionRef: z.string().max(255).optional().or(z.literal("")),
 });
+
+const teamEditInput = z.object({
+  id: z.number().int().positive(),
+  teamName: z.string().min(2).max(255),
+
+  leaderName: z.string().min(2).max(255),
+  leaderRoll: z.string().min(2).max(50),
+  leaderBranch: z.string().min(2).max(255),
+  leaderPhone: z.string().regex(phoneRegex, "Enter a 10-digit phone number"),
+  leaderEmail: z.string().email().optional().or(z.literal("")),
+
+  secondMemberPhone: z
+    .string()
+    .regex(phoneRegex, "Enter a 10-digit phone number")
+    .optional()
+    .or(z.literal("")),
+
+  member1Name: z.string().max(255).optional().or(z.literal("")),
+  member1Roll: z.string().max(50).optional().or(z.literal("")),
+  member1Branch: z.string().max(255).optional().or(z.literal("")),
+
+  member2Name: z.string().max(255).optional().or(z.literal("")),
+  member2Roll: z.string().max(50).optional().or(z.literal("")),
+  member2Branch: z.string().max(255).optional().or(z.literal("")),
+
+  member3Name: z.string().max(255).optional().or(z.literal("")),
+  member3Roll: z.string().max(50).optional().or(z.literal("")),
+  member3Branch: z.string().max(255).optional().or(z.literal("")),
+
+  member4Name: z.string().max(255).optional().or(z.literal("")),
+  member4Roll: z.string().max(50).optional().or(z.literal("")),
+  member4Branch: z.string().max(255).optional().or(z.literal("")),
+});
+
+const emptyToNull = (value?: string) => (value ? value : null);
 
 export const registrationsRouter = createRouter({
   // Current user's own registration
@@ -78,11 +118,8 @@ export const registrationsRouter = createRouter({
       });
     }
 
-    const emptyToNull = (v?: string) => (v ? v : null);
-
     const [result] = await db.insert(registrations).values({
       userId: ctx.user.id,
-
       teamName: input.teamName,
 
       leaderName: input.leaderName,
@@ -108,14 +145,14 @@ export const registrationsRouter = createRouter({
       member4Roll: emptyToNull(input.member4Roll),
       member4Branch: emptyToNull(input.member4Branch),
 
-      paymentScreenshotKey: emptyToNull(input.paymentScreenshotKey),
+      paymentScreenshotKey: input.paymentScreenshotKey,
       transactionRef: emptyToNull(input.transactionRef),
     });
 
     return { id: Number(result.insertId) };
   }),
 
-  // ---- Payment / UPI settings ----
+  // ---- Payment settings ----
   paymentSettings: publicQuery.query(async () => {
     const [row] = await getDb().select().from(paymentSettings).limit(1);
 
@@ -140,7 +177,6 @@ export const registrationsRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-
       const [existing] = await db.select().from(paymentSettings).limit(1);
 
       const values = {
@@ -164,7 +200,7 @@ export const registrationsRouter = createRouter({
       return { ok: true };
     }),
 
-  // ---- Admin review ----
+  // ---- Admin registration list ----
   listAll: adminQuery.query(async () => {
     const rows = await getDb()
       .select()
@@ -172,13 +208,67 @@ export const registrationsRouter = createRouter({
       .orderBy(desc(registrations.createdAt));
 
     return Promise.all(
-      rows.map(async (r) => ({
-        ...r,
-        paymentScreenshotUrl: await storageUrl(r.paymentScreenshotKey),
+      rows.map(async (row) => ({
+        ...row,
+        paymentScreenshotUrl: await storageUrl(row.paymentScreenshotKey),
       }))
     );
   }),
 
+  // ---- Admin edit team details ----
+  updateTeam: adminQuery
+    .input(teamEditInput)
+    .mutation(async ({ input }) => {
+      const { id, ...team } = input;
+      const db = getDb();
+
+      const [existing] = await db
+        .select({ id: registrations.id })
+        .from(registrations)
+        .where(eq(registrations.id, id))
+        .limit(1);
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Registration not found.",
+        });
+      }
+
+      await db
+        .update(registrations)
+        .set({
+          teamName: team.teamName,
+
+          leaderName: team.leaderName,
+          leaderRoll: team.leaderRoll,
+          leaderBranch: team.leaderBranch,
+          leaderPhone: team.leaderPhone,
+          leaderEmail: emptyToNull(team.leaderEmail),
+          secondMemberPhone: emptyToNull(team.secondMemberPhone),
+
+          member1Name: emptyToNull(team.member1Name),
+          member1Roll: emptyToNull(team.member1Roll),
+          member1Branch: emptyToNull(team.member1Branch),
+
+          member2Name: emptyToNull(team.member2Name),
+          member2Roll: emptyToNull(team.member2Roll),
+          member2Branch: emptyToNull(team.member2Branch),
+
+          member3Name: emptyToNull(team.member3Name),
+          member3Roll: emptyToNull(team.member3Roll),
+          member3Branch: emptyToNull(team.member3Branch),
+
+          member4Name: emptyToNull(team.member4Name),
+          member4Roll: emptyToNull(team.member4Roll),
+          member4Branch: emptyToNull(team.member4Branch),
+        })
+        .where(eq(registrations.id, id));
+
+      return { ok: true };
+    }),
+
+  // ---- Admin review ----
   review: adminQuery
     .input(
       z.object({

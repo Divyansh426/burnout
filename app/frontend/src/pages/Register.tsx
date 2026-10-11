@@ -80,36 +80,72 @@ export default function Register() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!/^\d{10}$/.test(form.leaderPhone)) {
-      setError("Leader phone must be exactly 10 digits.");
-      return;
+
+const onSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
+
+  if (!/^\d{10}$/.test(form.leaderPhone)) {
+    setError("Leader phone must be exactly 10 digits.");
+    return;
+  }
+
+  if (!/^\d{10}$/.test(form.secondMemberPhone)) {
+    setError("Second team contact number must be exactly 10 digits.");
+    return;
+  }
+
+  if (!shot) {
+    setError(
+      "Payment screenshot is required. Please upload your payment proof before submitting."
+    );
+    return;
+  }
+
+  if (!shot.type.startsWith("image/")) {
+    setError("Please upload a valid image file.");
+    return;
+  }
+
+  if (shot.size > 5 * 1024 * 1024) {
+    setError("Payment screenshot must be 5 MB or smaller.");
+    return;
+  }
+
+  try {
+    setUploading(true);
+
+    // Upload the screenshot first. Registration cannot proceed without it.
+    const contentBase64 = await fileToBase64(shot);
+
+    const saved = await uploadShot.mutateAsync({
+      fileName: `payments/${Date.now()}-${shot.name}`,
+      contentBase64,
+      contentType: shot.type,
+    });
+
+    if (!saved.key) {
+      throw new Error(
+        "Payment screenshot upload failed. Please try again."
+      );
     }
-    if (!/^\d{10}$/.test(form.secondMemberPhone)) {
-      setError("Second team contact number must be exactly 10 digits.");
-      return;
-    }
-    try {
-      setUploading(true);
-      let paymentScreenshotKey: string | undefined;
-      if (shot) {
-        const contentBase64 = await fileToBase64(shot);
-        const saved = await uploadShot.mutateAsync({
-          fileName: `payments/${Date.now()}-${shot.name}`,
-          contentBase64,
-          contentType: shot.type,
-        });
-        paymentScreenshotKey = saved.key;
-      }
-      await submit.mutateAsync({ ...form, paymentScreenshotKey });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
+
+    // Submit only after the screenshot upload succeeds.
+    await submit.mutateAsync({
+      ...form,
+      paymentScreenshotKey: saved.key,
+    });
+  } catch (err) {
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Submission failed. Please try again."
+    );
+  } finally {
+    setUploading(false);
+  }
+};
+
 
   if (authLoading || (isAuthenticated && regLoading)) {
     return (
@@ -326,12 +362,70 @@ export default function Register() {
                         <span className="mt-2 text-xs uppercase tracking-wider">
                           {shot ? shot.name : "Upload screenshot (max 5 MB)"}
                         </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => setShot(e.target.files?.[0] ?? null)}
-                        />
+                        
+<input
+  type="file"
+  accept="image/*"
+  className="hidden"
+  aria-label="Payment screenshot"
+  aria-required="true"
+  onChange={(e) => {
+    const file = e.target.files?.[0] ?? null;
+    setError(null);
+
+    if (!file) {
+      setShot(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setShot(null);
+      setError("Please upload a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setShot(null);
+      setError("Payment screenshot must be 5 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+
+    setShot(file);
+  }}
+/>
+<input
+  type="file"
+  accept="image/*"
+  className="hidden"
+  required={!shot}
+  onChange={(e) => {
+    const file = e.target.files?.[0] ?? null;
+    setError(null);
+
+    if (!file) {
+      setShot(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setShot(null);
+      setError("Please upload a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setShot(null);
+      setError("Payment screenshot must be 5 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+
+    setShot(file);
+  }}
+/>
                       </label>
                     </div>
 

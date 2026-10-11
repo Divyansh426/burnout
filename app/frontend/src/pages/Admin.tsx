@@ -341,13 +341,136 @@ function EventsAdmin() {
 }
 
 /* ================= REGISTRATIONS ================= */
+
 function RegistrationsAdmin() {
   const utils = trpc.useUtils();
   const { data: regs, isLoading } = trpc.registrations.listAll.useQuery();
-  const review = trpc.registrations.review.useMutation({ onSuccess: () => utils.registrations.invalidate() });
-  const [filter, setFilter] = useState<string>("all");
 
-  const filtered = regs?.filter((r) => filter === "all" || r.status === filter) ?? [];
+  const review = trpc.registrations.review.useMutation({
+    onSuccess: () => utils.registrations.invalidate(),
+  });
+
+  const updateTeam = trpc.registrations.updateTeam.useMutation({
+    onSuccess: () => utils.registrations.invalidate(),
+  });
+
+  const [filter, setFilter] = useState<string>("all");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editError, setEditError] = useState("");
+
+  const emptyForm = {
+    teamName: "",
+    leaderName: "",
+    leaderRoll: "",
+    leaderBranch: "",
+    leaderPhone: "",
+    leaderEmail: "",
+    secondMemberPhone: "",
+    member1Name: "",
+    member1Roll: "",
+    member1Branch: "",
+    member2Name: "",
+    member2Roll: "",
+    member2Branch: "",
+    member3Name: "",
+    member3Roll: "",
+    member3Branch: "",
+    member4Name: "",
+    member4Roll: "",
+    member4Branch: "",
+  };
+
+  const [editForm, setEditForm] = useState(emptyForm);
+
+  const filtered =
+    regs?.filter((r) => filter === "all" || r.status === filter) ?? [];
+
+  const startEditing = (r: NonNullable<typeof regs>[number]) => {
+    setEditingId(r.id);
+    setEditError("");
+    setEditForm({
+      teamName: r.teamName ?? "",
+      leaderName: r.leaderName ?? "",
+      leaderRoll: r.leaderRoll ?? "",
+      leaderBranch: r.leaderBranch ?? "",
+      leaderPhone: r.leaderPhone ?? "",
+      leaderEmail: r.leaderEmail ?? "",
+      secondMemberPhone: r.secondMemberPhone ?? "",
+      member1Name: r.member1Name ?? "",
+      member1Roll: r.member1Roll ?? "",
+      member1Branch: r.member1Branch ?? "",
+      member2Name: r.member2Name ?? "",
+      member2Roll: r.member2Roll ?? "",
+      member2Branch: r.member2Branch ?? "",
+      member3Name: r.member3Name ?? "",
+      member3Roll: r.member3Roll ?? "",
+      member3Branch: r.member3Branch ?? "",
+      member4Name: r.member4Name ?? "",
+      member4Roll: r.member4Roll ?? "",
+      member4Branch: r.member4Branch ?? "",
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditError("");
+    setEditForm(emptyForm);
+  };
+
+  const saveTeam = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setEditError("");
+
+    const id = editingId;
+    if (id === null) return;
+
+    if (
+      !editForm.teamName.trim() ||
+      !editForm.leaderName.trim() ||
+      !editForm.leaderRoll.trim() ||
+      !editForm.leaderBranch.trim() ||
+      !editForm.leaderPhone.trim() ||
+      !editForm.leaderEmail.trim()
+    ) {
+      setEditError("Please complete all required team leader fields.");
+      return;
+    }
+
+    try {
+      await updateTeam.mutateAsync({
+        id,
+        ...editForm,
+      });
+      cancelEditing();
+    } catch (error) {
+      setEditError(
+        error instanceof Error ? error.message : "Could not save team changes."
+      );
+    }
+  };
+
+  const field = (
+    label: string,
+    key: keyof typeof emptyForm,
+    required = false
+  ) => (
+    <div key={key}>
+      <label className={labelCls}>
+        {label}{required ? " *" : ""}
+      </label>
+      <input
+        className={inputCls}
+        required={required}
+        value={editForm[key]}
+        onChange={(e) =>
+          setEditForm((previous) => ({
+            ...previous,
+            [key]: e.target.value,
+          }))
+        }
+      />
+    </div>
+  );
 
   return (
     <div>
@@ -355,76 +478,233 @@ function RegistrationsAdmin() {
         {["all", "pending", "verified", "rejected"].map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilter(f)}
             className={`h-10 px-4 text-xs font-bold uppercase tracking-[0.14em] ${
-              filter === f ? "bg-[#d2ff00] text-[#12140e]" : "border border-border text-[#b4b8a5]"
+              filter === f
+                ? "bg-[#d2ff00] text-[#12140e]"
+                : "border border-border text-[#b4b8a5]"
             }`}
           >
-            {f} {f !== "all" && regs ? `(${regs.filter((r) => r.status === f).length})` : ""}
+            {f}{" "}
+            {f !== "all" && regs
+              ? `(${regs.filter((r) => r.status === f).length})`
+              : ""}
           </button>
         ))}
       </div>
 
-      {isLoading && <div className="mt-6 h-48 animate-pulse border border-border bg-[#171a10]" />}
+      {isLoading && (
+        <div className="mt-6 h-48 animate-pulse border border-border bg-[#171a10]" />
+      )}
 
       <div className="mt-6 space-y-3">
         {filtered.map((r) => (
           <div key={r.id} className="border border-border bg-[#171a10] p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-display text-lg uppercase text-[#f4f4ed]">{r.teamName}</p>
+                <p className="font-display text-lg uppercase text-[#f4f4ed]">
+                  {r.teamName}
+                </p>
                 <p className="mt-1 text-xs text-[#6b705c]">
                   #{r.id} · {new Date(r.createdAt).toLocaleString()}
                 </p>
               </div>
               <StatusPill status={r.status} />
             </div>
-            <div className="mt-4 grid gap-3 text-sm text-[#b4b8a5] sm:grid-cols-2 lg:grid-cols-4">
-              <p>Leader: <span className="text-[#f4f4ed]">{r.leaderName}</span></p>
-              <p>Roll: <span className="text-[#f4f4ed]">{r.leaderRoll}</span></p>
-              <p>Branch: <span className="text-[#f4f4ed]">{r.leaderBranch}</span></p>
-              <p>Phone: <span className="text-[#f4f4ed]">{r.leaderPhone}</span></p>
-            </div>
-            <p className="mt-2 text-sm text-[#b4b8a5]">
-              Crew:{" "}
-              <span className="text-[#f4f4ed]">
-                {[r.member1Name, r.member2Name, r.member3Name, r.member4Name].filter(Boolean).join(", ") || "—"}
-              </span>
-            </p>
-            {r.transactionRef && (
-              <p className="mt-1 text-sm text-[#b4b8a5]">UTR: <span className="text-[#f4f4ed]">{r.transactionRef}</span></p>
+
+            {editingId === r.id ? (
+              <form onSubmit={saveTeam} className="mt-5 border-t border-border pt-5">
+                <h4 className="font-display text-lg uppercase text-[#d2ff00]">
+                  Edit team details
+                </h4>
+
+                <div className="mt-4 space-y-5">
+                  <div>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-[#b4b8a5]">
+                      Team
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {field("Team name", "teamName", true)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-[#b4b8a5]">
+                      Team leader
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {field("Leader name", "leaderName", true)}
+                      {field("Roll number", "leaderRoll", true)}
+                      {field("Branch", "leaderBranch", true)}
+                      {field("Phone number", "leaderPhone", true)}
+                      {field("Email", "leaderEmail", true)}
+                      {field("Second team phone", "secondMemberPhone")}
+                    </div>
+                  </div>
+
+                  {[1, 2, 3, 4].map((memberNumber) => (
+                    <div key={memberNumber}>
+                      <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-[#b4b8a5]">
+                        Team member {memberNumber}
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {field(
+                          "Name",
+                          `member${memberNumber}Name` as keyof typeof emptyForm
+                        )}
+                        {field(
+                          "Roll number",
+                          `member${memberNumber}Roll` as keyof typeof emptyForm
+                        )}
+                        {field(
+                          "Branch",
+                          `member${memberNumber}Branch` as keyof typeof emptyForm
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {editError && (
+                  <p role="alert" className="mt-4 text-sm text-[#ff6b4a]">
+                    {editError}
+                  </p>
+                )}
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <button
+                    type="submit"
+                    disabled={updateTeam.isPending}
+                    className="flex h-11 items-center gap-2 bg-[#d2ff00] px-5 text-xs font-bold uppercase text-[#12140e] disabled:opacity-50"
+                  >
+                    {updateTeam.isPending && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    Save team
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={updateTeam.isPending}
+                    className="h-11 border border-border px-5 text-xs font-bold uppercase text-[#b4b8a5]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="mt-4 grid gap-3 text-sm text-[#b4b8a5] sm:grid-cols-2 lg:grid-cols-3">
+                  <p>
+                    Leader: <span className="text-[#f4f4ed]">{r.leaderName}</span>
+                  </p>
+                  <p>
+                    Roll: <span className="text-[#f4f4ed]">{r.leaderRoll}</span>
+                  </p>
+                  <p>
+                    Branch: <span className="text-[#f4f4ed]">{r.leaderBranch}</span>
+                  </p>
+                  <p>
+                    Phone: <span className="text-[#f4f4ed]">{r.leaderPhone}</span>
+                  </p>
+                  <p>
+                    Email: <span className="text-[#f4f4ed]">{r.leaderEmail || "—"}</span>
+                  </p>
+                  <p>
+                    Second phone:{" "}
+                    <span className="text-[#f4f4ed]">{r.secondMemberPhone || "—"}</span>
+                  </p>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {[1, 2, 3, 4].map((memberNumber) => {
+                    const name = r[`member${memberNumber}Name` as keyof typeof r];
+                    const roll = r[`member${memberNumber}Roll` as keyof typeof r];
+                    const branch = r[`member${memberNumber}Branch` as keyof typeof r];
+
+                    if (!name && !roll && !branch) return null;
+
+                    return (
+                      <div
+                        key={memberNumber}
+                        className="border border-border/70 p-3 text-sm text-[#b4b8a5]"
+                      >
+                        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#d2ff00]">
+                          Member {memberNumber}
+                        </p>
+                        <p>
+                          Name: <span className="text-[#f4f4ed]">{name || "—"}</span>
+                        </p>
+                        <p>
+                          Roll: <span className="text-[#f4f4ed]">{roll || "—"}</span>
+                        </p>
+                        <p>
+                          Branch: <span className="text-[#f4f4ed]">{branch || "—"}</span>
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {r.transactionRef && (
+                  <p className="mt-3 text-sm text-[#b4b8a5]">
+                    UTR: <span className="text-[#f4f4ed]">{r.transactionRef}</span>
+                  </p>
+                )}
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {r.paymentScreenshotUrl ? (
+                    <a
+                      href={r.paymentScreenshotUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold uppercase tracking-wider text-[#d2ff00] underline underline-offset-4"
+                    >
+                      View payment proof
+                    </a>
+                  ) : (
+                    <span className="text-xs uppercase tracking-wider text-[#ff6b4a]">
+                      No payment screenshot
+                    </span>
+                  )}
+
+                  <div className="ml-auto flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => startEditing(r)}
+                      className="h-10 border border-[#d2ff00]/60 px-4 text-xs font-bold uppercase text-[#d2ff00]"
+                    >
+                      Edit team
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => review.mutate({ id: r.id, status: "verified" })}
+                      className="flex h-10 items-center gap-1.5 bg-[#d2ff00] px-4 text-xs font-bold uppercase text-[#12140e]"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Verify
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => review.mutate({ id: r.id, status: "rejected" })}
+                      className="flex h-10 items-center gap-1.5 bg-[#ff6b4a] px-4 text-xs font-bold uppercase text-[#12140e]"
+                    >
+                      <XCircle className="h-3.5 w-3.5" /> Reject
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => review.mutate({ id: r.id, status: "pending" })}
+                      className="flex h-10 items-center gap-1.5 border border-border px-4 text-xs font-bold uppercase text-[#b4b8a5]"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              {r.paymentScreenshotUrl ? (
-                <a href={r.paymentScreenshotUrl} target="_blank" rel="noreferrer" className="text-xs font-bold uppercase tracking-wider text-[#d2ff00] underline underline-offset-4">
-                  View payment proof
-                </a>
-              ) : (
-                <span className="text-xs uppercase tracking-wider text-[#ff6b4a]">No payment screenshot</span>
-              )}
-              <div className="ml-auto flex gap-2">
-                <button
-                  onClick={() => review.mutate({ id: r.id, status: "verified" })}
-                  className="flex h-10 items-center gap-1.5 bg-[#d2ff00] px-4 text-xs font-bold uppercase text-[#12140e]"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Verify
-                </button>
-                <button
-                  onClick={() => review.mutate({ id: r.id, status: "rejected" })}
-                  className="flex h-10 items-center gap-1.5 bg-[#ff6b4a] px-4 text-xs font-bold uppercase text-[#12140e]"
-                >
-                  <XCircle className="h-3.5 w-3.5" /> Reject
-                </button>
-                <button
-                  onClick={() => review.mutate({ id: r.id, status: "pending" })}
-                  className="flex h-10 items-center gap-1.5 border border-border px-4 text-xs font-bold uppercase text-[#b4b8a5]"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
           </div>
         ))}
+
         {filtered.length === 0 && !isLoading && (
           <p className="border border-dashed border-border p-8 text-center text-sm text-[#6b705c]">
             No registrations in this lane.
@@ -434,6 +714,7 @@ function RegistrationsAdmin() {
     </div>
   );
 }
+
 
 /* ================= POINTS ================= */
 function PointsAdmin() {
