@@ -14,19 +14,24 @@ const totalExpr = sql<number>`(
   ${leaderboardEntries.mixedBonus}
 )`;
 
+
 const entryInput = z.object({
   teamName: z.string().trim().min(2).max(255),
+
   prefinalQualified: z.boolean().default(false),
   prefinalPosition: z.number().int().min(0).max(99).default(0),
   prefinalPoints: z.number().int().min(0).max(40).default(0),
+
   finalQualified: z.boolean().default(false),
   finalPosition: z.number().int().min(0).max(99).default(0),
   finalPoints: z.number().int().min(0).max(100).default(0),
+
   durability: z.number().int().min(0).max(75).default(0),
   manoeuvrability: z.number().int().min(0).max(50).default(0),
   technical: z.number().int().min(0).max(50).default(0),
   mixedBonus: z.number().int().min(0).max(10).default(0),
 });
+
 
 export const leaderboardRouter = createRouter({
   list: publicQuery.query(async () => {
