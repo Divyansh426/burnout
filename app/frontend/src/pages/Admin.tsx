@@ -852,12 +852,30 @@ function RegistrationsAdmin() {
 }
 
 
+
 /* ================= POINTS ================= */
 function PointsAdmin() {
   const utils = trpc.useUtils();
-  const { data: board } = trpc.leaderboard.list.useQuery();
-  const upsert = trpc.leaderboard.upsert.useMutation({ onSuccess: () => utils.leaderboard.invalidate() });
-  const remove = trpc.leaderboard.remove.useMutation({ onSuccess: () => utils.leaderboard.invalidate() });
+
+  const {
+    data: board,
+    isLoading: boardLoading,
+    isError: boardError,
+    error: boardQueryError,
+    refetch: refetchBoard,
+  } = trpc.leaderboard.list.useQuery();
+
+  const upsert = trpc.leaderboard.upsert.useMutation({
+    onSuccess: async () => {
+      await utils.leaderboard.list.invalidate();
+    },
+  });
+
+  const remove = trpc.leaderboard.remove.useMutation({
+    onSuccess: async () => {
+      await utils.leaderboard.list.invalidate();
+    },
+  });
 
   const empty = {
     teamName: "",
@@ -872,12 +890,18 @@ function PointsAdmin() {
     technical: 0,
     mixedBonus: 0,
   };
+
   const [form, setForm] = useState(empty);
 
-  const num = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm({ ...form, [k]: Number(e.target.value) });
+  const num = (k: keyof typeof empty) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({
+        ...prev,
+        [k]: Number(e.target.value),
+      }));
+    };
 
-  const edit = (t: NonNullable<typeof board>[number]) =>
+  const edit = (t: NonNullable<typeof board>[number]) => {
     setForm({
       teamName: t.teamName,
       prefinalQualified: t.prefinalQualified,
@@ -891,11 +915,26 @@ function PointsAdmin() {
       technical: t.technical,
       mixedBonus: t.mixedBonus,
     });
+  };
 
-  const numField = (label: string, key: keyof typeof empty, max: number) => (
+  const numField = (
+    label: string,
+    key: keyof typeof empty,
+    max: number
+  ) => (
     <div>
-      <label className={labelCls}>{label} (max {max})</label>
-      <input type="number" min={0} max={max} className={inputCls} value={form[key] as number} onChange={num(key)} />
+      <label className={labelCls}>
+        {label} (max {max})
+      </label>
+      <input
+        type="number"
+        min={0}
+        max={max}
+        step={1}
+        className={inputCls}
+        value={form[key] as number}
+        onChange={num(key)}
+      />
     </div>
   );
 
@@ -904,17 +943,41 @@ function PointsAdmin() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          upsert.mutate(form, { onSuccess: () => setForm(empty) });
+
+          upsert.mutate(form, {
+            onSuccess: () => {
+              setForm({ ...empty });
+            },
+          });
         }}
         className="h-fit border border-border bg-[#171a10] p-6"
       >
-        <h3 className="font-display text-xl uppercase text-[#f4f4ed]">Score a team</h3>
-        <p className="mt-1 text-xs text-[#6b705c]">Same team name = update. Max total 325.</p>
+        <h3 className="font-display text-xl uppercase text-[#f4f4ed]">
+          Score a team
+        </h3>
+
+        <p className="mt-1 text-xs text-[#6b705c]">
+          Same team name = update. Max total 325.
+        </p>
+
         <div className="mt-5 space-y-4">
           <div>
             <label className={labelCls}>Team name *</label>
-            <input required className={inputCls} value={form.teamName} onChange={(e) => setForm({ ...form, teamName: e.target.value })} />
+            <input
+              required
+              minLength={2}
+              maxLength={255}
+              className={inputCls}
+              value={form.teamName}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  teamName: e.target.value,
+                }))
+              }
+            />
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             {numField("Pre-final pts", "prefinalPoints", 40)}
             {numField("Pre-final pos", "prefinalPosition", 99)}
@@ -925,52 +988,147 @@ function PointsAdmin() {
             {numField("Technical", "technical", 50)}
             {numField("Mixed bonus", "mixedBonus", 10)}
           </div>
+
           <div className="flex gap-6">
             <label className="flex items-center gap-2 text-sm text-[#b4b8a5]">
-              <input type="checkbox" className="h-4 w-4 accent-[#d2ff00]" checked={form.prefinalQualified} onChange={(e) => setForm({ ...form, prefinalQualified: e.target.checked })} />
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-[#d2ff00]"
+                checked={form.prefinalQualified}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    prefinalQualified: e.target.checked,
+                  }))
+                }
+              />
               Pre-final ✓
             </label>
+
             <label className="flex items-center gap-2 text-sm text-[#b4b8a5]">
-              <input type="checkbox" className="h-4 w-4 accent-[#d2ff00]" checked={form.finalQualified} onChange={(e) => setForm({ ...form, finalQualified: e.target.checked })} />
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-[#d2ff00]"
+                checked={form.finalQualified}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    finalQualified: e.target.checked,
+                  }))
+                }
+              />
               Final ✓
             </label>
           </div>
-          <button disabled={upsert.isPending} className="flex w-full items-center justify-center gap-2 bg-[#d2ff00] py-3 text-sm font-bold uppercase tracking-[0.14em] text-[#12140e] disabled:opacity-50">
-            {upsert.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Save score
+
+          {upsert.isError && (
+            <p className="text-sm text-[#ff6b4a]">
+              Could not save score: {upsert.error.message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={upsert.isPending}
+            className="flex w-full items-center justify-center gap-2 bg-[#d2ff00] py-3 text-sm font-bold uppercase tracking-[0.14em] text-[#12140e] disabled:opacity-50"
+          >
+            {upsert.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
+            Save score
           </button>
         </div>
       </form>
 
       <div className="space-y-3">
+        {boardLoading && (
+          <p className="border border-border p-6 text-center text-sm text-[#b4b8a5]">
+            Loading leaderboard results...
+          </p>
+        )}
+
+        {boardError && (
+          <div className="border border-[#ff6b4a] p-4 text-sm text-[#ff6b4a]">
+            <p>Could not load leaderboard results.</p>
+            <p className="mt-2">{boardQueryError.message}</p>
+            <button
+              type="button"
+              onClick={() => refetchBoard()}
+              className="mt-3 border border-current px-4 py-2"
+            >
+              Retry loading
+            </button>
+          </div>
+        )}
+
+        {!boardLoading && !boardError && board?.length === 0 && (
+          <p className="border border-dashed border-border p-8 text-center text-sm text-[#6b705c]">
+            No teams scored yet.
+          </p>
+        )}
+
         {(board ?? []).map((t) => (
-          <div key={t.id} className="flex items-center gap-4 border border-border bg-[#171a10] p-4">
-            <span className="font-display w-8 text-xl text-[#6b705c]">#{t.rank}</span>
+          <div
+            key={t.id}
+            className="flex items-center gap-4 border border-border bg-[#171a10] p-4"
+          >
+            <span className="font-display w-8 text-xl text-[#6b705c]">
+              #{t.rank}
+            </span>
+
             <div className="min-w-0 flex-1">
-              <p className="font-display truncate uppercase text-[#f4f4ed]">{t.teamName}</p>
+              <p className="font-display truncate uppercase text-[#f4f4ed]">
+                {t.teamName}
+              </p>
               <p className="text-xs text-[#6b705c]">
-                Pre {t.prefinalPoints} · Final {t.finalPoints} · Dur {t.durability} · Man {t.manoeuvrability} · Tech {t.technical} · Bonus {t.mixedBonus}
+                Pre {t.prefinalPoints} · Final {t.finalPoints} · Dur{" "}
+                {t.durability} · Man {t.manoeuvrability} · Tech{" "}
+                {t.technical} · Bonus {t.mixedBonus}
               </p>
             </div>
-            <span className="font-display text-2xl text-[#d2ff00]">{t.total}</span>
-            <button onClick={() => edit(t)} className="h-10 border border-border px-4 text-xs font-bold uppercase text-[#b4b8a5] hover:text-[#d2ff00]">
+
+            <span className="font-display text-2xl text-[#d2ff00]">
+              {t.total}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => edit(t)}
+              className="h-10 border border-border px-4 text-xs font-bold uppercase text-[#b4b8a5] hover:text-[#d2ff00]"
+            >
               Edit
             </button>
+
             <button
-              onClick={() => remove.mutate({ id: t.id })}
-              className="flex h-10 w-10 items-center justify-center border border-border text-[#ff6b4a] hover:border-[#ff6b4a]"
-              aria-label="Delete team"
+              type="button"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    `Delete the score for "${t.teamName}"?`
+                  )
+                ) {
+                  remove.mutate({ id: t.id });
+                }
+              }}
+              className="flex h-10 w-10 items-center justify-center border border-border text-[#ff6b4a] hover:border-[#ff6b4a] disabled:opacity-50"
+              aria-label={`Delete score for ${t.teamName}`}
             >
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ))}
-        {board?.length === 0 && (
-          <p className="border border-dashed border-border p-8 text-center text-sm text-[#6b705c]">No teams scored yet.</p>
+
+        {remove.isError && (
+          <p className="text-sm text-[#ff6b4a]">
+            Could not delete score: {remove.error.message}
+          </p>
         )}
       </div>
     </div>
   );
 }
+
 
 /* ================= PAYMENT ================= */
 function PaymentAdmin() {
